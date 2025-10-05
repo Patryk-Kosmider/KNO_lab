@@ -1,3 +1,5 @@
+import sys
+
 import keras.models
 import numpy as np
 import tensorflow as tf
@@ -5,18 +7,22 @@ import argparse
 from keras.preprocessing import image
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--image', type=str)
+parser.add_argument("--image", type=str)
 args = parser.parse_args()
 
 # wymiary zdjecia
 IMG_WIDTH, IMG_HEIGHT = 28, 28
 
+
 def load_image(img_path):
-    img = image.load_img(img_path, color_mode='grayscale',target_size=(IMG_WIDTH, IMG_HEIGHT))
+    img = image.load_img(
+        img_path, color_mode="grayscale", target_size=(IMG_WIDTH, IMG_HEIGHT)
+    )
     img_tensor = image.img_to_array(img)
     img_tensor = np.array([img_tensor])
 
     return img_tensor
+
 
 mnist = tf.keras.datasets.mnist
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
@@ -30,12 +36,14 @@ model.fit(x_train, y_train, epochs=5)  # użyj verbose=0 jeśli jest problem z k
 model.evaluate(x_test, y_test)
 """
 
-#Zapis modelu do pliku
-#model.save('model.keras')
+# Zapis modelu do pliku
+# model.save('model.keras')
 
-#Zaladowanie modelu
-model = keras.models.load_model('model.keras')
-model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+# Zaladowanie modelu
+model = keras.models.load_model("model.keras")
+model.compile(
+    optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
+)
 model.fit(x_train, y_train, epochs=5)
 model.evaluate(x_test, y_test)
 
@@ -44,3 +52,6 @@ pred = model.predict(img)
 
 print(pred[0])
 
+
+if __name__ == "__main__":
+    sys.exit(0)
