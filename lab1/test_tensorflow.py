@@ -37,21 +37,28 @@ model.evaluate(x_test, y_test)
 """
 
 # Zapis modelu do pliku
-# model.save('model.keras')
+#model.save('model.keras')
 
 # Zaladowanie modelu
 model = keras.models.load_model("model.keras")
-model.compile(
-    optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"]
-)
-model.fit(x_train, y_train, epochs=5)
-model.evaluate(x_test, y_test)
+
 
 img = load_image(args.image)
 pred = model.predict(img)
 
 print(pred[0])
+"""
+# Krzywa uczenia dla modelu
+history = model.fit(
+    x_train,
+    y_train,
+    batch_size = 64,
+    epochs = 2,
+    verbose = 0,
+    validation_data = (x_test, y_test),
+)
 
-
+print("Ewualacja modelu ")
+"""
 if __name__ == "__main__":
     sys.exit(0)
