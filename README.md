@@ -1,0 +1,1 @@
+Patryk Kosmider s26985
