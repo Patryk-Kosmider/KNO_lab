@@ -7,6 +7,11 @@ from sklearn.metrics import confusion_matrix
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 
+data_augmentation = tf.keras.Sequential([
+    layers.RandomFlip("horizontal_and_vertical"),
+    layers.RandomRotation(0.4),
+])
+
 
 def load_data():
     fashion_mnist = tf.keras.datasets.fashion_mnist
@@ -21,21 +26,22 @@ def load_data():
     return train_images, train_labels, test_images, test_labels
 
 
-def build_cnn_model(hp=None):
-
-    filters_1 = hp.Int("filters_1", 32, 64, step=32) if hp else 32
-    filters_2 = hp.Int("filters_2", 64, 128, step=32) if hp else 64
+def build_cnn_model(hp=None, use_augmentation=False):
+    filters_1 = hp.Int("filters_1", 64, 128, step=32) if hp else 32
+    filters_2 = hp.Int("filters_2", 32, 64, step=32) if hp else 64
     dense = hp.Choice("dense", [32, 64, 128]) if hp else 64
     lr = hp.Float("lr", 1e-4, 1e-2, sampling="log") if hp else 0.001
 
     model = Sequential(name="model_cnn")
+
+    if use_augmentation:
+        model.add(data_augmentation)
+
     model.add(
         layers.Conv2D(filters_1, (3, 3), activation="relu", input_shape=(28, 28, 1))
     )
-    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
     model.add(layers.Conv2D(filters_2, (3, 3), activation="relu"))
-    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
 
     model.add(layers.Flatten())
     model.add(layers.Dense(dense, activation="relu"))
@@ -50,13 +56,17 @@ def build_cnn_model(hp=None):
     return model
 
 
-def build_dense_model(hp=None):
+def build_dense_model(hp=None, use_augmentation=False):
     dense_units1 = hp.Choice("dense", [32, 64, 128]) if hp else 128
     dense_units2 = hp.Choice("dense", [32, 64, 128]) if hp else 32
     dropout_rate = hp.Float("dropout", 0.0, 0.5, step=0.1) if hp else 0.2
     lr = hp.Float("lr", 1e-4, 1e-2, sampling="log") if hp else 0.001
 
     model = Sequential(name="dense_model")
+
+    if use_augmentation:
+        model.add(data_augmentation)
+
     model.add(layers.Flatten(input_shape=(28, 28, 1)))
     model.add(layers.Dense(dense_units1, activation="relu"))
 
@@ -144,19 +154,19 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--tuner", type=bool, default=False)
-
+    parser.add_argument("--augment", type=bool, default=False)
     args = parser.parse_args()
 
     if args.tuner:
         run_tuner(build_dense_model, data, "dense_model_tuner")
         run_tuner(build_cnn_model, data, "cnn_model_tuner")
     else:
-        fully_connected_model = build_dense_model()
+        fully_connected_model = build_dense_model(use_augmentation=args.augment)
         train_and_evaluate(
             fully_connected_model, data, "dense_model.keras", epochs=5, batch_size=32
         )
 
-        cnn_model = build_cnn_model()
+        cnn_model = build_cnn_model(use_augmentation=args.augment)
         train_and_evaluate(cnn_model, data, "cnn_model.keras", epochs=5, batch_size=32)
 
 
