@@ -45,7 +45,9 @@ def main():
     processed_image = preprocess_image(args.image)
 
     prediction = model.predict(processed_image, verbose=0)
-
+    probs = prediction[0]
+    for i, p in enumerate(probs):
+        print(f"{CLASS_NAMES[i]}: {p:.3f}")
     print(f"Prediction: {CLASS_NAMES[np.argmax(prediction)]}")
 
 

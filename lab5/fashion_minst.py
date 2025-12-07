@@ -9,7 +9,7 @@ from tensorflow.keras.models import Sequential
 
 data_augmentation = tf.keras.Sequential([
     layers.RandomFlip("horizontal_and_vertical"),
-    layers.RandomRotation(0.4),
+    layers.RandomRotation(0.1),
 ])
 
 
@@ -83,7 +83,7 @@ def build_dense_model(hp=None, use_augmentation=False):
     return model
 
 
-def train_and_evaluate(model, data, save_path, epochs=5, batch_size=32):
+def train_and_evaluate(model, data, save_path, epochs=5, batch_size=128):
     train_images, train_labels, test_images, test_labels = data
 
     history = model.fit(
