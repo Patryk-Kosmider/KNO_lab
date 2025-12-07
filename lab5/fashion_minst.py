@@ -148,16 +148,16 @@ def main():
     args = parser.parse_args()
 
     if args.tuner:
-        run_tuner(build_dense_model(), data, "dense_model_tuner")
+        run_tuner(build_dense_model, data, "dense_model_tuner")
         run_tuner(build_cnn_model, data, "cnn_model_tuner")
+    else:
+        fully_connected_model = build_dense_model()
+        train_and_evaluate(
+            fully_connected_model, data, "dense_model.keras", epochs=5, batch_size=32
+        )
 
-    fully_connected_model = build_dense_model()
-    train_and_evaluate(
-        fully_connected_model, data, "dense_model.keras", epochs=5, batch_size=32
-    )
-
-    cnn_model = build_cnn_model()
-    train_and_evaluate(cnn_model, data, "cnn_model.keras", epochs=5, batch_size=32)
+        cnn_model = build_cnn_model()
+        train_and_evaluate(cnn_model, data, "cnn_model.keras", epochs=5, batch_size=32)
 
 
 if __name__ == "__main__":
