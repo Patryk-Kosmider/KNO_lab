@@ -28,7 +28,7 @@ def preprocess_image(image_name):
     # normalizacja
     img = img / 225.0
     # wymiar kanalu (28, 28, 1)
-    img = np.expand_dims(img, axis=1)
+    img = np.expand_dims(img, axis=-1)
     # batch dimiension (1, 28, 28, 1)
     img = np.expand_dims(img, axis=0)
 
