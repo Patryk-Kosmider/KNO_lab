@@ -1,12 +1,13 @@
 import argparse
+import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras.models import Sequential
 import matplotlib.pyplot as plt
 
 data_augmentation = tf.keras.Sequential([
-    layers.RandomFlip("horizontal"),
-    layers.RandomRotation(0.1),
+    layers.RandomFlip("horizontal_and_vertical"),
+    layers.RandomRotation(0.3),
 ])
 
 def normalize(images):
@@ -22,7 +23,7 @@ def load_data():
         shuffle = True,
         validation_split = 0.2,
         subset = "training",
-        seed = 42,
+        seed = 123,
     )
 
     validation_dataset = tf.keras.preprocessing.image_dataset_from_directory(
@@ -33,7 +34,7 @@ def load_data():
         shuffle = True,
         validation_split = 0.2,
         subset = "validation",
-        seed = 42,
+        seed = 123,
     )
 
     train_dataset = train_dataset.map(normalize)
@@ -77,8 +78,8 @@ def build_autoencoder_model(latent_dim=2, use_augmentation=False):
     decoder = build_decoder_model(latent_dim)
 
     autoencoder = Sequential([encoder, decoder], name="autoencoder")
-    autoencoder.compile(optimizer='adam', loss='mse')
-    return autoencoder
+    autoencoder.compile(optimizer="adam", loss='mse')
+    return autoencoder, encoder
 
 def train_and_evaluate(model, train_data, val_data, epochs=50):
     history = model.fit(
@@ -105,8 +106,8 @@ def show_reconstructions(model, dataset, n=5):
             plt.axis('off')
             plt.title("Wynik")
         plt.show()
+        plt.savefig("rekonstrukcja.png")
         break
-
 
 def main():
     parser = argparse.ArgumentParser(description="Train an autoencoder on images.")
@@ -116,7 +117,7 @@ def main():
     args = parser.parse_args()
 
     train_data, val_data = load_data()
-    model = build_autoencoder_model(latent_dim=args.latent_dim, use_augmentation=args.use_augmentation)
+    model, encoder = build_autoencoder_model(latent_dim=args.latent_dim, use_augmentation=args.use_augmentation)
     history = train_and_evaluate(model, train_data, val_data, epochs=args.epochs)
 
     plt.plot(history.history['loss'], label='train_loss')
@@ -125,8 +126,10 @@ def main():
     plt.ylabel('Loss')
     plt.legend()
     plt.show()
+    plt.savefig("loss.png")
 
     show_reconstructions(model, val_data)
+    plot_latent_space(encoder, val_data)
 
 if __name__ == "__main__":
     main()
