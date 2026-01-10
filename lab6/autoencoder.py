@@ -129,7 +129,6 @@ def main():
     plt.savefig("loss.png")
 
     show_reconstructions(model, val_data)
-    plot_latent_space(encoder, val_data)
 
 if __name__ == "__main__":
     main()
